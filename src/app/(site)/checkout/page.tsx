@@ -91,7 +91,7 @@ export default function CheckoutPage() {
             </button>
           ))}
         </div>
-        {method === "BANK_TRANSFER" && <p className="mt-3 text-xs" style={{ color: "var(--ink-soft)" }}>Transfer details are shown after you place the order.</p>}
+        {method === "BANK_TRANSFER" && <p className="mt-3 text-xs" style={{ color: "var(--ink-soft)" }}>Transfer to <strong>Excellent Ishaku</strong> — 1034751725, GTBank. Order ships once payment reflects.</p>}
         {method === "COD" && <p className="mt-3 text-xs" style={{ color: "var(--ink-soft)" }}>Pay in cash when your order is delivered. Available in select cities only.</p>}
       </div>
 
