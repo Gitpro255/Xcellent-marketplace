@@ -36,8 +36,7 @@ export default function ContactPage() {
       </div>
       <div className="mb-5 flex flex-wrap gap-5">
         <div className="flex items-center gap-2 text-sm"><Phone size={16} color="var(--brass)" /> {PHONE}</div>
-        <div className="flex items-center gap-2 text-sm"><Mail size={16} color="var(--brass)" /> hello@xcellent.ng</div>
-      </div>
+        <div className="flex items-center gap-2 text-sm"><Mail size={16} color="var(--brass)" /> excellentishaku@gmail.com</div>
       <div className="rounded-xl border p-5" style={{ borderColor: "var(--line)", background: "var(--surface)" }}>
         {sent ? (
           <p style={{ color: "var(--success)" }}>Message sent — we'll reply soon.</p>
