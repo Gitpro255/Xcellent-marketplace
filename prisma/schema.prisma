@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  AWAITING_SHIPMENT
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CARD
+  BANK_TRANSFER
+  COD
+}
+
+enum DisputeStatus {
+  OPEN
+  RESOLVED
+  REJECTED
+}
+
+// All money fields are integers in kobo (NGN * 100) to avoid floating point errors.
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  phone         String?
+  password      String
+  role          Role      @default(BUYER)
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+
+  shop                Shop?
+  orders              Order[]
+  reviews             Review[]
+  verificationTokens  VerificationToken[]
+}
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Shop {
+  id        String    @id @default(cuid())
+  name      String
+  city      String?
+  ownerId   String    @unique
+  owner     User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products  Product[]
+  createdAt DateTime  @default(now())
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  price       Int
+  category    String
+  stock       Int      @default(0)
+  emoji       String?
+  color       String?
+  image       String?
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  orderItems  OrderItem[]
+  reviews     Review[]
+  createdAt   DateTime @default(now())
+
+  @@index([shopId])
+  @@index([category])
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  buyerId       String
+  buyer         User          @relation(fields: [buyerId], references: [id])
+  status        OrderStatus   @default(PENDING)
+  paymentMethod PaymentMethod
+  paystackRef   String?       @unique
+  subtotal      Int
+  fee           Int
+  shipping      Int
+  total         Int
+  address       String
+  city          String
+  state         String
+  items         OrderItem[]
+  dispute       Dispute?
+  createdAt     DateTime      @default(now())
+
+  @@index([buyerId])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  title     String
+  price     Int
+  qty       Int
+  sellerId  String
+
+  @@index([orderId])
+  @@index([sellerId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+model Dispute {
+  id        String        @id @default(cuid())
+  orderId   String        @unique
+  order     Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  reason    String
+  status    DisputeStatus @default(OPEN)
+  createdAt DateTime      @default(now())
+}
+
+model Payout {
+  id        String   @id @default(cuid())
+  shopId    String
+  amount    Int
+  period    String
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+
+  @@index([shopId])
+}
