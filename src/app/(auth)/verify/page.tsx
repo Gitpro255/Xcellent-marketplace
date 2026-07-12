@@ -22,6 +22,8 @@ function VerifyForm() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,15 +46,28 @@ function VerifyForm() {
   };
 
   const resend = async () => {
+    if (cooldown > 0 || resending) return;
     setNotice("");
     setError("");
+    setResending(true);
     const res = await fetch("/api/auth/verify", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
     });
-    if (res.ok) setNotice("A new code has been sent.");
-    else setError("Couldn't resend — try again shortly.");
+    setResending(false);
+    if (res.ok) {
+      setNotice("A new code has been sent — check your inbox (and spam folder).");
+      let seconds = 30;
+      setCooldown(seconds);
+      const timer = setInterval(() => {
+        seconds -= 1;
+        setCooldown(seconds);
+        if (seconds <= 0) clearInterval(timer);
+      }, 1000);
+    } else {
+      setError("Couldn't resend — try again shortly.");
+    }
   };
 
   return (
@@ -83,7 +98,9 @@ function VerifyForm() {
           </button>
         </form>
 
-        <button onClick={resend} className="mt-3.5 text-[13px]" style={{ color: "var(--forest)" }}>Resend code</button>
+        <button onClick={resend} disabled={resending || cooldown > 0} className="mt-3.5 text-[13px]" style={{ color: resending || cooldown > 0 ? "var(--ink-soft)" : "var(--forest)" }}>
+          {resending ? "Sending..." : cooldown > 0 ? `Resend code (${cooldown}s)` : "Resend code"}
+        </button>
       </div>
     </AuthShell>
   );
