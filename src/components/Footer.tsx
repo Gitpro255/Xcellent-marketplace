@@ -26,8 +26,7 @@ export function Footer() {
           <div>
             <div className="mb-2 text-[11px] tracking-wider opacity-50">REACH US</div>
             <div className="mb-1.5 flex items-center gap-1.5 opacity-85"><Phone size={13} /> {PHONE}</div>
-            <div className="flex items-center gap-1.5 opacity-85"><Mail size={13} /> hello@xcellent.ng</div>
-          </div>
+            <div className="flex items-center gap-1.5 opacity-85"><Mail size={13} /> excellentishaku@gmail.com</div>ss
         </div>
       </div>
       <div className="perf opacity-30" />
